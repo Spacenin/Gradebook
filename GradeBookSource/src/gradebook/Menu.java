@@ -24,12 +24,13 @@ public class Menu {
 			System.out.println("3. Quiz");
 			System.out.print("--> ");
 			userChoice = sc.nextInt();
+			sc.nextLine();
 			
 			if (userChoice == 1) {
 				grades[elemNum] = new Discussion();
 				
 				System.out.println("Enter the associated reading: ");
-				String tempReading = sc.next();
+				String tempReading = sc.nextLine();
 				((Discussion)grades[elemNum]).setReading(tempReading);
 			}
 			
@@ -37,7 +38,7 @@ public class Menu {
 				grades[elemNum] = new Program();
 				
 				System.out.println("Enter the concept being tested: ");
-				String tempConcept = sc.next();
+				String tempConcept = sc.nextLine();
 				((Program)grades[elemNum]).setConcept(tempConcept);
 			}
 			
@@ -46,6 +47,7 @@ public class Menu {
 				
 				System.out.println("Enter the number of questions in the quiz: ");
 				int tempQNum = sc.nextInt();
+				sc.nextLine();
 				((Quiz)grades[elemNum]).setQNumber(tempQNum);
 			}
 			
@@ -58,6 +60,7 @@ public class Menu {
 			try {
 				System.out.println("Enter the score: ");
 				tempScore = sc.nextInt();
+				sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a number! It must be an integer value.");
 				grades[elemNum] = null;
@@ -69,6 +72,7 @@ public class Menu {
 			try {
 				System.out.println("Enter the letter of the graded assignment: ");
 				tempLetter = sc.next().charAt(0);
+				sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a letter! It must be a character value.");
 				grades[elemNum] = null;
@@ -79,7 +83,7 @@ public class Menu {
 			
 			try {
 				System.out.println("Enter the name of the graded assignment: ");
-				tempName = sc.next();
+				tempName = sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a string! It must be a string.");
 				grades[elemNum] = null;
@@ -94,6 +98,7 @@ public class Menu {
 				tempMonth = sc.nextInt();
 				tempDay = sc.nextInt();
 				tempYear = sc.nextInt();
+				sc.nextLine();
 				
 				tempDate = LocalDate.of(tempYear, tempMonth, tempDay);
 			} 
@@ -106,8 +111,7 @@ public class Menu {
 			}
 			catch (DateTimeException exc) {
 				System.out.println("That date isn't right! Exiting branch...");
-				sc.nextLine();
-				grades[elemNum] = null;
+				grades[elemNum] = null;				
 				
 				return(grades);
 			}
@@ -129,6 +133,7 @@ public class Menu {
 		}
 		catch (InputMismatchException exc) {
 			System.out.println("That input isn't valid! Exiting branch...");
+			grades[elemNum] = null;
 			sc.nextLine();
 			
 			return(grades);
@@ -152,7 +157,7 @@ public class Menu {
 		
 		try {
 			System.out.println("Enter the name of the assignment you'd like to remove: ");
-			String tempName = sc.next();
+			String tempName = sc.nextLine();
 			
 			boolean looper = true;
 			int itr = 0;

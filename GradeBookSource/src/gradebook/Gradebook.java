@@ -14,6 +14,7 @@ public class Gradebook {
 		
 		System.out.println("Welcome to the 2810 Gradebook Project!");
 		System.out.print("Enter the number of grades you would like to enter (max of 20): ");
+		
 		try {
 			gradesNum = sc.nextInt();
 		} catch (InputMismatchException exc) {
@@ -22,7 +23,7 @@ public class Gradebook {
 			sc.nextLine();
 		}
 		
-		if (gradesNum <= 0) {
+		if ((gradesNum <= 0) || (gradesNum > 20)) {
 			System.out.println("You entered an invalid gradebook number, defaulting to size 20.");
 			gradesNum = 20;
 		}
@@ -47,9 +48,10 @@ public class Gradebook {
 			
 			try {
 				userChoice = sc.nextInt();
+				sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That is not a number! Continuing on...");
-				sc.nextLine();
+				
 				userChoice = 0;
 			}
 			
@@ -57,14 +59,35 @@ public class Gradebook {
 				case 0:
 					break;
 				case 1:
+					int loopNum = 0;
+					
 					try {
-						grades = m.addGrade(grades, elemNum);
+						System.out.println("Enter the number of grades you'd like to enter (can add until full): ");
+						loopNum = sc.nextInt();
 						
-						if (grades[elemNum] != null) {
-							++elemNum;
+						if (loopNum > grades.length) {
+							System.out.println("That number is higher than size of array! Defaulting to one addition.\n");
+							
+							loopNum = 1;
 						}
-					} 
-					catch (GradebookFullException exc) {}
+					} catch (InputMismatchException exc) {
+						System.out.println("You must enter a number!");
+					}
+					
+					for (int i = 0; i < loopNum; ++i) {
+						try {
+							grades = m.addGrade(grades, elemNum);
+							
+							if (grades[elemNum] != null) {
+								++elemNum;
+								
+								System.out.println("1 grade added!");
+							}
+						} 
+						catch (GradebookFullException exc) {
+							break;
+						}
+					}
 					
 					break;
 				case 2:
@@ -80,43 +103,37 @@ public class Gradebook {
 				case 3:
 					try {
 						m.printGrades(grades, elemNum);
-					} 
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 4:
 					try {
 						m.printAverage(grades, elemNum);
-					}
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 5:
 					try {
 						m.printMaxMin(grades, elemNum);
-					}
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 6:
 					try {
 						m.printQuizAverage(grades, elemNum);
-					}
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 7:
 					try {
 						m.printReadings(grades, elemNum);
-					}
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 8:
 					try {
 						m.printConcepts(grades, elemNum);
-					}
-					catch (GradebookEmptyException exc) {}
+					} catch (GradebookEmptyException exc) {}
 					
 					break;
 				case 9:

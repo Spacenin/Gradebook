@@ -62,13 +62,14 @@ public class Discussion implements AssignmentInterface {
 	}
 	
 	public String toString() {
-		return("Score: " + score + "\n" + "   Letter: " + letter + "\n" + 
-				"   Name: " + name + "\n" + "   Due date: " + due.toString() + "\n" + "   Reading: " +
+		return("Name: " + name + "\n" + "   Score: " + score + "\n" + "   Letter: " + letter + 
+				"\n" + "   Due date: " + due.toString() + "\n" + "   Reading: " +
 				reading);
 	}
 	
 	public boolean isValid() {
-		if (letter != 'A' && letter != 'B' && letter != 'C' && letter != 'D' && letter != 'F') {
+		if (letter == 'A' || letter == 'B' || letter == 'C' || letter == 'D' || letter == 'F') {}
+		else {
 			return(false);
 		}
 		

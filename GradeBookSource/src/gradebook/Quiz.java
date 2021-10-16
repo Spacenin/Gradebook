@@ -62,8 +62,8 @@ public class Quiz implements AssignmentInterface {
 	}
 	
 	public String toString() {
-		return("Score: " + score + "\n" + "   Letter: " + letter + "\n" + "   Name: " +
-				name + "\n" + "   Due date: " + 
+		return("Name: " + name + "\n" + "   Score: " + score + "\n" + "   Letter: " + letter +
+				"\n" + "   Due date: " + 
 				due.toString() + "\n" + "   Question Number: " + questionNumber);
 	}
 	
