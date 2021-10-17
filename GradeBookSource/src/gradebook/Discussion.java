@@ -2,6 +2,7 @@ package gradebook;
 
 import java.time.LocalDate;
 
+//Discussion grade type
 public class Discussion implements AssignmentInterface {
 	private String reading;
 	private int score;
@@ -9,6 +10,7 @@ public class Discussion implements AssignmentInterface {
 	private String name;
 	private LocalDate due;
 	
+	//Parameterized constructor
 	Discussion(String reading, int score, char letter, String name, LocalDate date) {
 		this.reading = reading;
 		this.score = score;
@@ -17,10 +19,12 @@ public class Discussion implements AssignmentInterface {
 		due = date;
 	}
 	
+	//Default constructor, which calls above constructor
 	Discussion() {
 		this(" ", 0, ' ', " ", LocalDate.now());
 	}
 	
+	//Getters
 	public String getReading() {
 		return(reading);
 	}
@@ -41,6 +45,7 @@ public class Discussion implements AssignmentInterface {
 		return(due);
 	}
 	
+	//Setters
 	public void setReading(String reading) {
 		this.reading = reading;
 	}
@@ -61,12 +66,14 @@ public class Discussion implements AssignmentInterface {
 		due = date;
 	}
 	
+	//Returns grade as a string (for printing)
 	public String toString() {
 		return("Name: " + name + "\n" + "   Score: " + score + "\n" + "   Letter: " + letter + 
 				"\n" + "   Due date: " + due.toString() + "\n" + "   Reading: " +
 				reading);
 	}
 	
+	//Checks if score and letter match
 	public boolean isValid() {
 		if (letter == 'A' || letter == 'B' || letter == 'C' || letter == 'D' || letter == 'F') {}
 		else {

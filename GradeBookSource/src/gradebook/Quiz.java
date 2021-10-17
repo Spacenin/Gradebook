@@ -2,6 +2,7 @@ package gradebook;
 
 import java.time.LocalDate;
 
+//Quiz grade type
 public class Quiz implements AssignmentInterface {
 	private int questionNumber;
 	private int score;
@@ -9,6 +10,7 @@ public class Quiz implements AssignmentInterface {
 	private String name;
 	private LocalDate due;
 	
+	//Parameterized constructor
 	Quiz(int questionNumber, int score, char letter, String name, LocalDate date) {
 		this.questionNumber = questionNumber;
 		this.score = score;
@@ -17,10 +19,12 @@ public class Quiz implements AssignmentInterface {
 		due = date;
 	}
 	
+	//Default constructor, calling above constructor
 	Quiz() {
 		this(0, 0, ' ', " ", LocalDate.now());
 	}
 	
+	//Getters
 	public int getQNumber() {
 		return(questionNumber);
 	}
@@ -41,6 +45,7 @@ public class Quiz implements AssignmentInterface {
 		return(due);
 	}
 	
+	//Setters
 	public void setQNumber(int questionNumber) {
 		this.questionNumber = questionNumber;
 	}
@@ -61,12 +66,14 @@ public class Quiz implements AssignmentInterface {
 		due = date;
 	}
 	
+	//Return grade as string (for printing)
 	public String toString() {
 		return("Name: " + name + "\n" + "   Score: " + score + "\n" + "   Letter: " + letter +
 				"\n" + "   Due date: " + 
 				due.toString() + "\n" + "   Question Number: " + questionNumber);
 	}
 	
+	//Checks if score and letter match
 	public boolean isValid() {
 		if (letter == 'A' || letter == 'B' || letter == 'C' || letter == 'D' || letter == 'F') {}
 		else {
