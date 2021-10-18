@@ -82,6 +82,7 @@ public class Gradebook {
 						//Catch non integer value
 					} catch (InputMismatchException exc) {
 						System.out.println("You must enter a number!");
+						sc.nextLine();
 					}
 					
 					//Loop and add each grade
