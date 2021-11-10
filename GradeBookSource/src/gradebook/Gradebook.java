@@ -1,6 +1,7 @@
 package gradebook;
 
 import java.util.InputMismatchException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 //Main driver method, looping and printing menu, then calling menu functions accordingly
@@ -14,7 +15,7 @@ public class Gradebook {
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.println("Welcome to the 2810 Gradebook Project!");
-		System.out.print("Enter the number of grades you would like to enter (max of 20): ");
+		/*System.out.print("Enter the number of grades you would like to enter (max of 20): ");
 		
 		//Exception catch for non integer array size
 		try {
@@ -29,10 +30,12 @@ public class Gradebook {
 		if ((gradesNum <= 0) || (gradesNum > 20)) {
 			System.out.println("You entered an invalid gradebook number, defaulting to size 20.");
 			gradesNum = 20;
-		}
+		} 
 		
 		//Initialize the new array
-		AssignmentInterface[] grades = new AssignmentInterface[gradesNum];
+		AssignmentInterface[] grades = new AssignmentInterface[gradesNum]; */
+		
+		ArrayList<AssignmentInterface> grades = new ArrayList<AssignmentInterface>();
 		
 		Menu m = new Menu();
 		
@@ -71,15 +74,9 @@ public class Gradebook {
 					
 					try {
 						//Allow user to enter multiple grades
-						System.out.println("Enter the number of grades you'd like to enter (can add until full): ");
+						System.out.println("Enter the number of grades you'd like to enter: ");
 						loopNum = sc.nextInt();
-						
-						//Check that the number of grades to enter is not more than size of array
-						if (loopNum > grades.length) {
-							System.out.println("That number is higher than size of array! Defaulting to one addition.\n");
-							
-							loopNum = 1;
-						}
+
 						//Catch non integer value
 					} catch (InputMismatchException exc) {
 						System.out.println("You must enter a number!");
@@ -89,12 +86,10 @@ public class Gradebook {
 					//Loop and add each grade
 					for (int i = 0; i < loopNum; ++i) {
 						try {
-							grades = m.addGrade(grades, elemNum);
+							grades = m.addGrade(grades, i);
 							
 							//If function performed as wanted
-							if (grades[elemNum] != null) {
-								++elemNum;
-								
+							if (grades.get(i) != null) {
 								System.out.println("1 grade added!");
 							}
 						}
@@ -108,9 +103,7 @@ public class Gradebook {
 				//Remove grade
 				case 2:
 					try {
-						grades = m.removeGrade(grades, elemNum);
-						
-						--elemNum;
+						grades = m.removeGrade(grades, grades.size());
 					}
 					//Catch gradebook is empty or the grade doesn't exist
 					catch (GradebookEmptyException exc) {}
@@ -120,48 +113,8 @@ public class Gradebook {
 				//Print all grades in gradebook
 				case 3:
 					try {
-						m.printGrades(grades, elemNum);
+						m.printGrades(grades, grades.size());
 					//Catch gradebook is empty 
-					} catch (GradebookEmptyException exc) {}
-					
-					break;
-				//Print average score of all grades
-				case 4:
-					try {
-						m.printAverage(grades, elemNum);
-					//Catch if gradebook is empty
-					} catch (GradebookEmptyException exc) {}
-					
-					break;
-				//Prints maximum and minimum scores
-				case 5:
-					try {
-						m.printMaxMin(grades, elemNum);
-					//Catch if gradebook is empty
-					} catch (GradebookEmptyException exc) {}
-					
-					break;
-				//Quiz question number average
-				case 6:
-					try {
-						m.printQuizAverage(grades, elemNum);
-					//Catch if gradebook is empty
-					} catch (GradebookEmptyException exc) {}
-					
-					break;
-				//Print all discussion readings
-				case 7:
-					try {
-						m.printReadings(grades, elemNum);
-					//Catch if gradebook is empty
-					} catch (GradebookEmptyException exc) {}
-					
-					break;
-				//Print all program concepts
-				case 8:
-					try {
-						m.printConcepts(grades, elemNum);
-					//Catch if gradebook is empty
 					} catch (GradebookEmptyException exc) {}
 					
 					break;
