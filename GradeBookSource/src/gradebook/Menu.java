@@ -209,6 +209,8 @@ public class Menu {
 		//Exception if iterator meets outside array bounds, throwing the grade isn't in gradebook
 		} catch(ArrayIndexOutOfBoundsException exc) {
 			throw new InvalidGradeException();
+		} catch (NullPointerException exc) {
+			System.out.println("That's not a name!");
 		}
 		
 		return(grades);

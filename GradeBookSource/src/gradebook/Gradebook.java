@@ -57,9 +57,10 @@ public class Gradebook {
 				sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That is not a number! Continuing on...");
+				sc = new Scanner(System.in);
 				
 				userChoice = 0;
-			}
+			} 
 			
 			switch(userChoice) {
 				case 0:
