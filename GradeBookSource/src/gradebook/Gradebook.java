@@ -46,11 +46,8 @@ public class Gradebook {
 			System.out.println("1. Add grades to gradebook");
 			System.out.println("2. Remove grade from gradebook");
 			System.out.println("3. Print grades in gradebook");
-			System.out.println("4. Print average grade");
-			System.out.println("5. Print the highest and lowest grades");
-			System.out.println("6. Print average # of questions in quizzes");
-			System.out.println("7. Print assoicated readings for every discussion");
-			System.out.println("8. Print concepts of every programming assignment");
+			System.out.println("4. Print to file");
+			System.out.println("5. Read from file");
 			System.out.println("9. Leave this program");
 			System.out.print("--> ");
 			
@@ -86,7 +83,7 @@ public class Gradebook {
 					//Loop and add each grade
 					for (int i = 0; i < loopNum; ++i) {
 						try {
-							grades = m.addGrade(grades, i);
+							grades = m.addGrade(grades);
 							
 							//If function performed as wanted
 							if (grades.get(i) != null) {
@@ -95,6 +92,10 @@ public class Gradebook {
 						}
 						//Catch if the gradebook is full
 						catch (GradebookFullException exc) {
+							break;
+						}
+						
+						catch (IndexOutOfBoundsException exc) {
 							break;
 						}
 					}
@@ -116,6 +117,31 @@ public class Gradebook {
 						m.printGrades(grades, grades.size());
 					//Catch gradebook is empty 
 					} catch (GradebookEmptyException exc) {}
+					
+					break;
+				case 4:
+					try {
+						m.printFile(grades);
+						
+						System.out.println("Done!");
+					} catch (GradebookEmptyException exc) {}
+					
+					break;
+				//Read file
+				case 5:
+					ArrayList<AssignmentInterface> gradesFiled = m.readFile();
+					
+					//Check if the file was actually read
+					if (gradesFiled == null) {
+						System.out.println("The file was not read!");
+					}
+					
+					//If so, then set the gradebook to the read one
+					else {
+						grades = gradesFiled;
+						
+						System.out.println("Done!");
+					}
 					
 					break;
 				//Leave program

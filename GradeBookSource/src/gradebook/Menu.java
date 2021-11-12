@@ -11,14 +11,14 @@ public class Menu {
 	private static Scanner sc = new Scanner(System.in);
 	
 	//Add grade option
-	public ArrayList<AssignmentInterface> addGrade(ArrayList<AssignmentInterface> grades, int elemNum) throws GradebookFullException {
+	public ArrayList<AssignmentInterface> addGrade(ArrayList<AssignmentInterface> grades) throws GradebookFullException {
 		try {
-			//Tries to access the next element to add, throws exception if is full
 			int userChoice;
 			int tempScore;
 			char tempLetter;
 			String tempName;
 			LocalDate tempDate;
+			AssignmentInterface thisGrade;
 			
 			//User enters the type of grade to add
 			System.out.println("Enter what type of grade you would like:");
@@ -31,30 +31,31 @@ public class Menu {
 			
 			//Sets the grade to add as a discussion and sets reading
 			if (userChoice == 1) {
-				grades.add(new Discussion());
+				thisGrade = new Discussion();
 				
 				System.out.println("Enter the associated reading: ");
 				String tempReading = sc.nextLine();
-				((Discussion)grades.get(elemNum)).setReading(tempReading);
+				((Discussion)thisGrade).setReading(tempReading);
 			}
 			
 			//Sets the grade to add as a program and sets concept
 			else if (userChoice == 2) {
-				grades.add(new Program());
+				thisGrade = new Program();
 				
 				System.out.println("Enter the concept being tested: ");
 				String tempConcept = sc.nextLine();
-				((Program)grades.get(elemNum)).setConcept(tempConcept);
+				((Program)thisGrade).setConcept(tempConcept);
 			}
 			
 			//Sets the grade to add as a quiz and sets question number
 			else if (userChoice == 3) {
-				grades.add(new Quiz());
+				thisGrade = new Quiz();
 				
 				System.out.println("Enter the number of questions in the quiz: ");
 				int tempQNum = sc.nextInt();
 				sc.nextLine();
-				((Quiz)grades.get(elemNum)).setQNumber(tempQNum);
+
+				((Quiz)thisGrade).setQNumber(tempQNum);
 			}
 			
 			//Skips this grade if user did not enter one of the three
@@ -71,7 +72,6 @@ public class Menu {
 				sc.nextLine(); 					//Had to include nextLine after each single variable scan, as it would leave lingering newline char
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a number! It must be an integer value.");
-				grades.set(elemNum, null);
 				sc.nextLine();
 				
 				return(grades);
@@ -84,7 +84,6 @@ public class Menu {
 				sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a letter! It must be a character value.");
-				grades.set(elemNum, null);
 				sc.nextLine();
 				
 				return(grades);
@@ -96,7 +95,6 @@ public class Menu {
 				tempName = sc.nextLine();
 			} catch (InputMismatchException exc) {
 				System.out.println("That's not a string! It must be a string.");
-				grades.set(elemNum, null);
 				sc.nextLine();
 				
 				return(grades);
@@ -115,40 +113,38 @@ public class Menu {
 			} 
 			catch (InputMismatchException exc) {
 				System.out.println("It must be an integer value!");
-				grades.set(elemNum, null);
 				sc.nextLine();
 				
 				return(grades);
 			}
 			catch (DateTimeException exc) {
 				System.out.println("That date isn't right! Exiting branch...");
-				grades.set(elemNum, null);				
 				
 				return(grades);
 			}
 			
 			//Sets each variable
-			grades.get(elemNum).setDue(tempDate);
-			grades.get(elemNum).setLetter(tempLetter);
-			grades.get(elemNum).setName(tempName);
-			grades.get(elemNum).setScore(tempScore);
+			thisGrade.setDue(tempDate);
+			thisGrade.setLetter(tempLetter);
+			thisGrade.setName(tempName);
+			thisGrade.setScore(tempScore);
 			
 			//Checks that score and letter are valid combination
-			if (!grades.get(elemNum).isValid()) {
+			if (!thisGrade.isValid()) {
 				System.out.println("That grade is invalid, so it wasn't added!");
-				grades.set(elemNum, null);
 			} 
+			
+			grades.add(thisGrade);
 		
 			return(grades);
 		}
 		//Exception if full
-		catch (ArrayIndexOutOfBoundsException exc) {
+		catch (IndexOutOfBoundsException exc) {
 			throw new GradebookFullException();
 		}
 		//Blanket case exception if input doesn't match
 		catch (InputMismatchException exc) {
 			System.out.println("That input isn't valid! Exiting branch...");
-			grades.set(elemNum, null);
 			sc.nextLine();
 			
 			return(grades);
@@ -162,8 +158,44 @@ public class Menu {
 			throw new GradebookEmptyException();
 		} 
 		
+		boolean looper = true;
+		int userChoice;
+		
+		while (looper) {
+			//Allow user to sort by option
+			System.out.println("Enter how to sort grades by: ");
+			System.out.println("1. Score (numeric)");
+			System.out.println("2. Letter");
+			System.out.println("3. Alphabetical name");
+			System.out.println("4. Due date");
+			
+			try {
+				userChoice = sc.nextInt();
+				sc.nextLine();
+			} catch (InputMismatchException exc) {
+				System.out.println("Error, that was an invalid option! Please try again...");
+				
+				sc = new Scanner(System.in);
+				userChoice = -1;
+			}
+			
+			switch (userChoice) {
+				case -1:
+					break;
+				case 1:
+					grades = Helpers.sortBookScore(grades);
+					
+					looper = false;
+					break;
+				default:
+					System.out.println("Invalid option! Try again...");
+					
+					break;
+			}
+		}
+		
 		//Loop to print each one
-		for (int i = 1; i <= elemNum; ++i) {
+		for (int i = 1; i <= grades.size(); ++i) {
 			System.out.println(i + ". " + grades.get(i-1).toString());
 		}
 	}
@@ -208,6 +240,45 @@ public class Menu {
 			throw new InvalidGradeException();
 		} catch (NullPointerException exc) {
 			System.out.println("That's not a name!");
+		}
+		
+		return(grades);
+	}
+	
+	//Mainly calls printFile in fileIO and checks if empty
+	public void printFile(ArrayList<AssignmentInterface> grades) throws GradebookEmptyException {
+		if (grades.size() == 0) {
+			throw new GradebookEmptyException();
+		}
+		
+		//Gets filename and calls fileIO print
+		try {
+			System.out.println("Enter the filename to print to <without the .txt extension>: ");
+			
+			String fileName = sc.nextLine();
+			
+			fileName = fileName + ".txt";
+			
+			FileIO.printToFile(fileName, grades);
+		} catch (Exception exc) {
+			System.out.println(exc);
+		}
+	}
+	
+	//Mainly calls FileIO's readFile, but gets fileName from user
+	public ArrayList<AssignmentInterface> readFile() {
+		ArrayList<AssignmentInterface> grades = new ArrayList<AssignmentInterface>();
+		
+		try {
+			System.out.println("Enter the filename to read from <without the .txt extension>: ");
+			
+			String fileName = sc.nextLine();
+			
+			fileName = fileName + ".txt";
+			
+			grades = FileIO.readFile(fileName);
+		} catch (Exception exc) {
+			System.out.println(exc);
 		}
 		
 		return(grades);
