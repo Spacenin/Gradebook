@@ -5,13 +5,17 @@ import java.util.InputMismatchException;
 import java.time.DateTimeException;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 //Set of menu functions called by the main driver
 public class Menu {
 	private static Scanner sc = new Scanner(System.in);
 	
 	//Add grade option
-	public ArrayList<AssignmentInterface> addGrade(ArrayList<AssignmentInterface> grades) throws GradebookFullException {
+	public AssignmentInterface addGrade() {
 		try {
 			int userChoice;
 			int tempScore;
@@ -62,7 +66,7 @@ public class Menu {
 			else {
 				System.out.println("You didn't pick a right choice! You have to go back now.");
 				
-				return(grades);
+				return(null);
 			}
 			
 			//Enter the score of the grade and catch exception if non integer, setting the grade to null
@@ -74,7 +78,7 @@ public class Menu {
 				System.out.println("That's not a number! It must be an integer value.");
 				sc.nextLine();
 				
-				return(grades);
+				return(null);
 			}
 			
 			//Enter the letter of the grade and catch exception if non character, setting the grade to null
@@ -86,7 +90,7 @@ public class Menu {
 				System.out.println("That's not a letter! It must be a character value.");
 				sc.nextLine();
 				
-				return(grades);
+				return(null);
 			}
 			
 			//Enter the name of the grade and catch exception if the non string, setting the grade to null
@@ -97,7 +101,7 @@ public class Menu {
 				System.out.println("That's not a string! It must be a string.");
 				sc.nextLine();
 				
-				return(grades);
+				return(null);
 			}
 			
 			//Enter the due date as a LocalDate variable, and checks that it's a valid LocalDate and all integers
@@ -115,12 +119,12 @@ public class Menu {
 				System.out.println("It must be an integer value!");
 				sc.nextLine();
 				
-				return(grades);
+				return(null);
 			}
 			catch (DateTimeException exc) {
 				System.out.println("That date isn't right! Exiting branch...");
 				
-				return(grades);
+				return(null);
 			}
 			
 			//Sets each variable
@@ -132,29 +136,27 @@ public class Menu {
 			//Checks that score and letter are valid combination
 			if (!thisGrade.isValid()) {
 				System.out.println("That grade is invalid, so it wasn't added!");
-			} 
+				
+				return(null);
+			}
 			
-			grades.add(thisGrade);
-		
-			return(grades);
-		}
-		//Exception if full
-		catch (IndexOutOfBoundsException exc) {
-			throw new GradebookFullException();
+			else {
+				return(thisGrade);
+			}
 		}
 		//Blanket case exception if input doesn't match
 		catch (InputMismatchException exc) {
 			System.out.println("That input isn't valid! Exiting branch...");
 			sc.nextLine();
 			
-			return(grades);
+			return(null);
 		}
 	}
 	
 	//Loop through and print each grade
-	public void printGrades(ArrayList<AssignmentInterface> grades, int elemNum) throws GradebookEmptyException {
+	public void printGrades(ArrayList<AssignmentInterface> grades) throws GradebookEmptyException {
 		//Check if gradebook is empty
-		if (elemNum == 0) {
+		if (grades.size() == 0) {
 			throw new GradebookEmptyException();
 		} 
 		
@@ -183,7 +185,18 @@ public class Menu {
 				case -1:
 					break;
 				case 1:
-					grades = Helpers.sortBookScore(grades);
+				case 2:
+					Helpers.sortBookScore(grades);
+					
+					looper = false;
+					break;
+				case 3:
+					Helpers.sortBookName(grades);
+					
+					looper = false;
+					break;
+				case 4:
+					Helpers.sortBookDate(grades);
 					
 					looper = false;
 					break;
@@ -193,17 +206,12 @@ public class Menu {
 					break;
 			}
 		}
-		
-		//Loop to print each one
-		for (int i = 1; i <= grades.size(); ++i) {
-			System.out.println(i + ". " + grades.get(i-1).toString());
-		}
 	}
 	
 	//Remove a specified grade by name
-	public ArrayList<AssignmentInterface> removeGrade(ArrayList<AssignmentInterface> grades, int elemNum) throws GradebookEmptyException, InvalidGradeException {
+	public ArrayList<AssignmentInterface> removeGrade(ArrayList<AssignmentInterface> grades) throws GradebookEmptyException, InvalidGradeException {
 		//Check if gradebook is empty
-		if (elemNum == 0) {
+		if (grades.size() == 0) {
 			throw new GradebookEmptyException();
 		}
 		
@@ -212,7 +220,7 @@ public class Menu {
 			System.out.println("Names of all assignments:");
 			
 			//Displays currently stored names
-			for (int i = 0; i < elemNum; ++i) {
+			for (int i = 0; i < grades.size(); ++i) {
 				System.out.println((i+1) + ". " + grades.get(i).getName());
 			}
 			
@@ -282,5 +290,137 @@ public class Menu {
 		}
 		
 		return(grades);
+	}
+	
+	//Sends all of grades to MySQL database
+	public void toMySQL(ArrayList<AssignmentInterface> grades) throws GradebookEmptyException {
+		if (grades.size() == 0) {
+			throw new GradebookEmptyException();
+		}
+		
+		Connection dbConnect = DBUtil.getConnection();
+		
+		try {
+			String createTable = "CREATE TABLE IF NOT EXISTS gradebook (" +
+					"score int," +
+				    "letter char," +
+				    "gradeName varchar(100)," +
+				    "dueDate varchar(100)," +
+				    "concept varchar(100)," +
+				    "reading varchar(100)," +
+				    "qNumber int" +
+				");";
+			
+			PreparedStatement ps = dbConnect.prepareStatement(createTable);
+			ps.executeUpdate();
+			
+			String insert = "INSERT INTO gradebook VALUES (?, ?, ?, ?, ?, ?, ?)";
+			PreparedStatement insertPS = dbConnect.prepareStatement(insert);
+					
+			for (int i = 0; i < grades.size(); ++i) {
+				insertPS.setInt(1, grades.get(i).getScore());
+				insertPS.setString(2, String.valueOf(grades.get(i).getLetter()));
+				insertPS.setString(3, grades.get(i).getName());
+				insertPS.setString(4, grades.get(i).getDue().toString());
+				
+				if (grades.get(i) instanceof Program) {
+					insertPS.setString(5, ((Program)grades.get(i)).getConcept());
+					insertPS.setNull(6, java.sql.Types.VARCHAR);
+					insertPS.setNull(7, java.sql.Types.INTEGER);
+				}
+				
+				else if (grades.get(i) instanceof Discussion) {
+					insertPS.setNull(5, java.sql.Types.VARCHAR);
+					insertPS.setString(6, ((Discussion)grades.get(i)).getReading());
+					insertPS.setNull(7, java.sql.Types.INTEGER);
+				}
+				
+				else {
+					insertPS.setNull(5, java.sql.Types.VARCHAR);
+					insertPS.setNull(6, java.sql.Types.VARCHAR);
+					insertPS.setInt(7, ((Quiz)grades.get(i)).getQNumber());
+				}
+				
+				insertPS.executeUpdate();
+			}
+		} catch (SQLException exc) {
+			System.out.println(exc);
+		}
+	}
+	
+	//Gets all unadded grades from the SQL database and adds them to the local gradebook
+	public ArrayList<AssignmentInterface> fromMySQL(ArrayList<AssignmentInterface> grades) {
+		ArrayList<AssignmentInterface> gradesFrom = new ArrayList<AssignmentInterface>();
+		Connection myDB = DBUtil.getConnection();
+		
+		try {
+			PreparedStatement ps = myDB.prepareStatement("SELECT * FROM gradebook");
+			
+			ResultSet selected = ps.executeQuery();
+			
+			while (selected.next()) {
+				AssignmentInterface tempGrade;
+				
+				int tempScore = selected.getInt("score");
+				char tempLetter = selected.getString("letter").charAt(0);
+				String tempName = selected.getString("gradeName");
+				LocalDate tempDate = LocalDate.parse(selected.getString("dueDate"));
+				
+				String tempConcept = selected.getString("concept");
+				String tempReading = selected.getString("reading");
+				int tempQNum = selected.getInt("qNumber");
+				
+				if (tempConcept != null) {
+					tempGrade = new Program();
+					
+					((Program)tempGrade).setConcept(tempConcept);
+				}
+				
+				else if (tempReading != null) {
+					tempGrade = new Discussion();
+					
+					((Discussion)tempGrade).setReading(tempReading);
+				}
+				
+				else {
+					tempGrade = new Quiz();
+					
+					((Quiz)tempGrade).setQNumber(tempQNum);
+				}
+				
+				tempGrade.setScore(tempScore);
+				tempGrade.setLetter(tempLetter);
+				tempGrade.setName(tempName);
+				tempGrade.setDue(tempDate);
+				
+				gradesFrom.add(tempGrade);
+			}
+			
+			if (grades.size() != gradesFrom.size()) {
+				if (grades.size() < gradesFrom.size()) {					
+					for (int i = grades.size(); i < gradesFrom.size(); ++i) {
+						grades.add(gradesFrom.get(i));
+					}
+				}
+				
+				if (gradesFrom.size() < grades.size()) {	
+					int gradesSized = grades.size();
+					
+					for (int i = gradesFrom.size(); i < gradesSized; ++i) {
+						grades.remove(grades.size() - 1);
+					}
+				}
+			}
+			
+			for (int i = 0; i < grades.size(); ++i) {
+				System.out.println(grades.get(i).toString());
+			}
+			
+			
+		
+		} catch (SQLException exc) {
+			System.out.println(exc);
+		}
+		return(gradesFrom);
 	}
 }

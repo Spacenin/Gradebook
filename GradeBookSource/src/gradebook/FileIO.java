@@ -66,6 +66,8 @@ public class FileIO {
 		//If file doesn't exist, return null arrayLists
 		if (Files.notExists(filePath)) {
 			System.out.println("That file does not exist! Please try again...");
+			
+			return(null);
 		}
 		
 		//Otherwise, read each line and parse the string into grades

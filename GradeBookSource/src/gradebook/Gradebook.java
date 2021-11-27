@@ -8,32 +8,11 @@ import java.util.Scanner;
 public class Gradebook {
 
 	public static void main(String[] args) {
-		int gradesNum;
 		int userChoice = 0;
-		int elemNum = 0;
 		boolean looper = true;
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.println("Welcome to the 2810 Gradebook Project!");
-		/*System.out.print("Enter the number of grades you would like to enter (max of 20): ");
-		
-		//Exception catch for non integer array size
-		try {
-			gradesNum = sc.nextInt();
-		} catch (InputMismatchException exc) {
-			System.out.println("You did not enter a valid integer for the size! Defaulting to size 20.");
-			gradesNum = 20;
-			sc.nextLine();
-		}
-		
-		//Check for logical array size
-		if ((gradesNum <= 0) || (gradesNum > 20)) {
-			System.out.println("You entered an invalid gradebook number, defaulting to size 20.");
-			gradesNum = 20;
-		} 
-		
-		//Initialize the new array
-		AssignmentInterface[] grades = new AssignmentInterface[gradesNum]; */
 		
 		ArrayList<AssignmentInterface> grades = new ArrayList<AssignmentInterface>();
 		
@@ -48,6 +27,8 @@ public class Gradebook {
 			System.out.println("3. Print grades in gradebook");
 			System.out.println("4. Print to file");
 			System.out.println("5. Read from file");
+			System.out.println("6. To MySQL");
+			System.out.println("7. From MySQL");
 			System.out.println("9. Leave this program");
 			System.out.print("--> ");
 			
@@ -83,19 +64,15 @@ public class Gradebook {
 					//Loop and add each grade
 					for (int i = 0; i < loopNum; ++i) {
 						try {
-							grades = m.addGrade(grades);
+							AssignmentInterface gradeTry = m.addGrade();
 							
 							//If function performed as wanted
-							if (grades.get(i) != null) {
+							if (gradeTry != null) {
+								grades.add(gradeTry);
+								
 								System.out.println("1 grade added!");
 							}
-						}
-						//Catch if the gradebook is full
-						catch (GradebookFullException exc) {
-							break;
-						}
-						
-						catch (IndexOutOfBoundsException exc) {
+						} catch (IndexOutOfBoundsException exc) {
 							break;
 						}
 					}
@@ -104,7 +81,7 @@ public class Gradebook {
 				//Remove grade
 				case 2:
 					try {
-						grades = m.removeGrade(grades, grades.size());
+						grades = m.removeGrade(grades);
 					}
 					//Catch gradebook is empty or the grade doesn't exist
 					catch (GradebookEmptyException exc) {}
@@ -114,11 +91,14 @@ public class Gradebook {
 				//Print all grades in gradebook
 				case 3:
 					try {
-						m.printGrades(grades, grades.size());
+						m.printGrades(grades);
+						
+						System.out.println("Done!");
 					//Catch gradebook is empty 
 					} catch (GradebookEmptyException exc) {}
 					
 					break;
+				//Print to file
 				case 4:
 					try {
 						m.printFile(grades);
@@ -132,16 +112,30 @@ public class Gradebook {
 					ArrayList<AssignmentInterface> gradesFiled = m.readFile();
 					
 					//Check if the file was actually read
-					if (gradesFiled == null) {
-						System.out.println("The file was not read!");
-					}
+					if (gradesFiled == null) {}
 					
 					//If so, then set the gradebook to the read one
 					else {
-						grades = gradesFiled;
+						grades.addAll(gradesFiled);
 						
 						System.out.println("Done!");
 					}
+					
+					break;
+				//Send local gradebook to SQL database
+				case 6:
+					try {
+						m.toMySQL(grades);
+						
+						System.out.println("Done!");
+					} catch (GradebookEmptyException exc) {}
+					
+					break;
+				//Get unadded grades from SQL database to local gradebook
+				case 7:
+					m.fromMySQL(grades);
+					
+					System.out.println("Done!");
 					
 					break;
 				//Leave program
@@ -158,6 +152,7 @@ public class Gradebook {
 			}
 		}
 		
+		DBUtil.closeConnection();
 		sc.close();
 	}
 }
