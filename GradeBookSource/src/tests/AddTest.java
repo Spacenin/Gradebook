@@ -2,7 +2,6 @@ package tests;
 
 import org.junit.*;
 import gradebook.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -82,5 +81,16 @@ public class AddTest {
 		grades.add(m.addGrade());
 		
 		assertNull("The gradebook should be empty if the add grades failed", grades.get(0));
+	}
+	
+	@Test
+	public void testAddThenFail() {
+		System.out.println("Test add then fail");
+		
+		grades.add(m.addGrade());
+		grades.add(m.addGrade());
+		
+		assertNull("The second element should be null, and first not null", grades.get(1));
+		assertNotNull("The second element should be null, and first not null", grades.get(0));
 	}
 }

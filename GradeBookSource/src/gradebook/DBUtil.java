@@ -18,7 +18,7 @@ public class DBUtil {
     } else {
       try {
         // set the db url, username, and password
-        String url = "jdbc:mysql://showcreatedb.cqzpcdfdub0n.us-east-1.rds.amazonaws.com/sys";
+        String url = "jdbc:mysql://myawsdb.cno2zewghfii.us-east-1.rds.amazonaws.com/sys";
         String username = new String();
         String password = new String();
         
