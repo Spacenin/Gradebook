@@ -11,7 +11,7 @@ public class Program implements AssignmentInterface {
 	private LocalDate due;
 	
 	//Parameterized constructor
-	Program(String concept, int score, char letter, String name, LocalDate date) {
+	public Program(String concept, int score, char letter, String name, LocalDate date) {
 		this.concept = concept;
 		this.score = score;
 		this.letter = letter;
@@ -20,7 +20,7 @@ public class Program implements AssignmentInterface {
 	}
 	
 	//Default constructor, calling above constructor
-	Program() {
+	public Program() {
 		this(" ", 0, ' ', " ", LocalDate.now());
 	}
 	

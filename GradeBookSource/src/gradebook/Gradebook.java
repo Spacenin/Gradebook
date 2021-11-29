@@ -29,6 +29,7 @@ public class Gradebook {
 			System.out.println("5. Read from file");
 			System.out.println("6. To MySQL");
 			System.out.println("7. From MySQL");
+			System.out.println("8. Search MySQL");
 			System.out.println("9. Leave this program");
 			System.out.print("--> ");
 			
@@ -133,7 +134,14 @@ public class Gradebook {
 					break;
 				//Get unadded grades from SQL database to local gradebook
 				case 7:
-					m.fromMySQL(grades);
+					grades = m.fromMySQL(grades);
+					
+					System.out.println("Done!");
+					
+					break;
+				//Search SQL database under certain criteria
+				case 8:
+					m.searchMySQL();
 					
 					System.out.println("Done!");
 					

@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 //Set of menu functions called by the main driver
 public class Menu {
-	private static Scanner sc = new Scanner(System.in);
+	private Scanner sc = new Scanner(System.in);
 	
 	//Add grade option
 	public AssignmentInterface addGrade() {
@@ -170,6 +170,7 @@ public class Menu {
 			System.out.println("2. Letter");
 			System.out.println("3. Alphabetical name");
 			System.out.println("4. Due date");
+			System.out.print("--> ");
 			
 			try {
 				userChoice = sc.nextInt();
@@ -214,6 +215,8 @@ public class Menu {
 		if (grades.size() == 0) {
 			throw new GradebookEmptyException();
 		}
+		
+		sc = new Scanner(System.in);
 		
 		//Loop through to find the grade and remove it
 		try {
@@ -300,6 +303,7 @@ public class Menu {
 		
 		Connection dbConnect = DBUtil.getConnection();
 		
+		//Create table if it does not exist
 		try {
 			String createTable = "CREATE TABLE IF NOT EXISTS gradebook (" +
 					"score int," +
@@ -316,7 +320,8 @@ public class Menu {
 			
 			String insert = "INSERT INTO gradebook VALUES (?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement insertPS = dbConnect.prepareStatement(insert);
-					
+				
+			//Add each grade, depending on its type
 			for (int i = 0; i < grades.size(); ++i) {
 				insertPS.setInt(1, grades.get(i).getScore());
 				insertPS.setString(2, String.valueOf(grades.get(i).getLetter()));
@@ -354,10 +359,11 @@ public class Menu {
 		Connection myDB = DBUtil.getConnection();
 		
 		try {
-			PreparedStatement ps = myDB.prepareStatement("SELECT * FROM gradebook");
+			PreparedStatement ps = myDB.prepareStatement("SELECT * FROM gradebook;");
 			
 			ResultSet selected = ps.executeQuery();
 			
+			//Get each grade from the SQL database
 			while (selected.next()) {
 				AssignmentInterface tempGrade;
 				
@@ -396,6 +402,7 @@ public class Menu {
 				gradesFrom.add(tempGrade);
 			}
 			
+			//Check if local grades is greater than or less than SQL grades, and add or remove as needed
 			if (grades.size() != gradesFrom.size()) {
 				if (grades.size() < gradesFrom.size()) {					
 					for (int i = grades.size(); i < gradesFrom.size(); ++i) {
@@ -411,16 +418,260 @@ public class Menu {
 					}
 				}
 			}
+		} catch (Exception exc) {
+			System.out.println(exc);
+		}
+		
+		return(grades);
+	}
+	
+	//Search for all grades matching certain criteria
+	public void searchMySQL() {
+		boolean looper = true;
+		Connection myDB = DBUtil.getConnection();
+		int userChoice = 0;
+		String searchQuery = "SELECT * FROM gradebook;";
+		
+		while (looper) {
+			System.out.println("Enter how you would like to search by: ");
+			System.out.println("1. Search for all quizzes");
+			System.out.println("2. Search for all programs");
+			System.out.println("3. Search for all discussions");
+			System.out.println("4. Search for all grades within a score range");
+			System.out.println("5. Search for all grades within a due date range");
+			System.out.println("6. Search for all grades with an even score");
+			System.out.print("--> ");
 			
-			for (int i = 0; i < grades.size(); ++i) {
-				System.out.println(grades.get(i).toString());
+			//Gets user choice of how to search SQL database
+			try {
+				userChoice = sc.nextInt();
+			} catch (InputMismatchException exc) {
+				System.out.println("Error, that's not an integer!");
+				
+				sc = new Scanner(System.in);
+				
+				userChoice = 0;
 			}
 			
-			
+			switch (userChoice) {
+				case 0:
+					break;
+				//Search for all quizzes
+				case 1:
+					searchQuery = "SELECT * FROM gradebook WHERE qNumber IS NOT NULL;";
+					looper = false;
+					
+					break;
+				//Search for all programs
+				case 2:
+					searchQuery = "SELECT * FROM gradebook WHERE concept IS NOT NULL;";
+					looper = false;
+					
+					break;
+				//Search for all discussion
+				case 3:
+					searchQuery = "SELECT * FROM gradebook WHERE reading IS NOT NULL;";
+					looper = false;
+					
+					break;
+				//Search for grade range
+				case 4:
+					int lower, upper;
+					
+					System.out.print("Enter the upper and lower range for scores: ");
+					
+					try {
+						upper = sc.nextInt();
+						lower = sc.nextInt();
+					} catch (InputMismatchException exc) {
+						System.out.println("Error, that's not an integer!");
+						sc = new Scanner(System.in);
+						
+						break;
+					}
+					
+					searchQuery = "SELECT * FROM gradebook WHERE score BETWEEN " + lower + " AND " + upper + ";";
+					looper = false;
+					
+					break;
+				//Search for due date range
+				case 5:
+					//Gets the upper limit due date from the user
+					int upperYear, upperDay, upperMonth;
+					
+					System.out.print("Enter the upper date (M D Y): ");
+					
+					try {
+						upperMonth = sc.nextInt();
+						upperDay = sc.nextInt();
+						upperYear = sc.nextInt();
+					} catch (InputMismatchException exc) {
+						System.out.println("Error, that's not an integer!");
+						sc = new Scanner(System.in);
+						
+						break;
+					}
+					
+					//Gets the lower limit due date from the user
+					int lowerYear, lowerDay, lowerMonth;
+					
+					System.out.print("Enter the lower date (M D Y): ");
+					
+					try {
+						lowerMonth = sc.nextInt();
+						lowerDay = sc.nextInt();
+						lowerYear = sc.nextInt();
+					} catch (InputMismatchException exc) {
+						System.out.println("Error, that's not an integer!");
+						sc = new Scanner(System.in);
+						
+						break;
+					} 
+					
+					LocalDate upperLimit = LocalDate.of(upperYear, upperMonth, upperDay);
+					LocalDate lowerLimit = LocalDate.of(lowerYear, lowerMonth, lowerDay);
+					
+					//Get all due dates into arrayList
+					String getDatesQuery = "SELECT dueDate FROM gradebook;";
+					ArrayList<LocalDate> dates = new ArrayList<LocalDate>();
+					ArrayList<LocalDate> dates2 = new ArrayList<LocalDate>();
+					ArrayList<AssignmentInterface> gradesSearched = new ArrayList<AssignmentInterface>();
+					
+					try {
+						PreparedStatement ps = myDB.prepareStatement(getDatesQuery);
+						ResultSet rs = ps.executeQuery();
+						
+						while (rs.next()) {
+							dates.add(LocalDate.parse(rs.getString("dueDate")));
+						}
+					} catch (SQLException exc) {
+						System.out.println(exc);
+						
+						break;
+					}
+					
+					//Add dates that fall into range
+					for (int i = 0; i < dates.size(); ++i) {
+						if ((dates.get(i).compareTo(lowerLimit) >= 0) && (dates.get(i).compareTo(upperLimit) <= 0)) {
+							dates2.add(dates.get(i));
+						}
+					}
+					
+					//Select all data that corresponds with the dates
+					for (int i = 0; i < dates2.size(); ++i) {
+						String getThisOne = "SELECT * FROM gradebook WHERE dueDate = \"" + dates2.get(i).toString() + "\";";
+						
+						try {
+							PreparedStatement ps = myDB.prepareStatement(getThisOne);
+							ResultSet rs = ps.executeQuery();
+							
+							while (rs.next()) {
+								AssignmentInterface tempGrade;
+								
+								int tempScore = rs.getInt("score");
+								char tempLetter = rs.getString("letter").charAt(0);
+								String tempName = rs.getString("gradeName");
+								LocalDate tempDue = LocalDate.parse(rs.getString("dueDate"));
+								
+								String tempConcept = rs.getString("concept");
+								String tempReading = rs.getString("reading");
+								int tempQNum = rs.getInt("qNumber");
+								
+								if (tempConcept != null) {
+									tempGrade = new Program();
+									((Program)tempGrade).setConcept(tempConcept);
+								}
+								
+								else if (tempReading != null) {
+									tempGrade = new Discussion();
+									((Discussion)tempGrade).setReading(tempReading);
+								}
+								
+								else {
+									tempGrade = new Quiz();
+									((Quiz)tempGrade).setQNumber(tempQNum);
+								}
+								
+								tempGrade.setDue(tempDue);
+								tempGrade.setLetter(tempLetter);
+								tempGrade.setName(tempName);
+								tempGrade.setScore(tempScore);
+								
+								gradesSearched.add(tempGrade);
+							}
+						} catch (SQLException exc) {
+							System.out.println(exc);
+						}
+					}
+					
+					//Print it out
+					for (int i = 0; i < gradesSearched.size(); ++i) {
+						System.out.println(i+1 + ". " + gradesSearched.get(i).toString());
+					}
+					
+					//Must leave this function call so it doesn't reach below query
+					return;
+				//Search for grades with even score
+				case 6:
+					searchQuery = "SELECT * FROM gradebook WHERE score % 2 = 0;";
+					looper = false;
+					
+					break;
+				default:
+					System.out.println("That's an invalid choice!");
+					
+					break;
+			}
+		}
 		
+		ArrayList<AssignmentInterface> grades = new ArrayList<AssignmentInterface>();
+		
+		//Get each grade from the database as needed
+		try {
+			PreparedStatement ps = myDB.prepareStatement(searchQuery);
+			ResultSet rs = ps.executeQuery();
+			
+			while (rs.next()) {
+				AssignmentInterface tempGrade;
+				
+				int tempScore = rs.getInt("score");
+				char tempLetter = rs.getString("letter").charAt(0);
+				String tempName = rs.getString("gradeName");
+				LocalDate tempDue = LocalDate.parse(rs.getString("dueDate"));
+				
+				String tempConcept = rs.getString("concept");
+				String tempReading = rs.getString("reading");
+				int tempQNum = rs.getInt("qNumber");
+				
+				if (tempConcept != null) {
+					tempGrade = new Program();
+					((Program)tempGrade).setConcept(tempConcept);
+				}
+				
+				else if (tempReading != null) {
+					tempGrade = new Discussion();
+					((Discussion)tempGrade).setReading(tempReading);
+				}
+				
+				else {
+					tempGrade = new Quiz();
+					((Quiz)tempGrade).setQNumber(tempQNum);
+				}
+				
+				tempGrade.setDue(tempDue);
+				tempGrade.setLetter(tempLetter);
+				tempGrade.setName(tempName);
+				tempGrade.setScore(tempScore);
+				
+				grades.add(tempGrade);
+			}
+			
+			//Print out each grade
+			for (int i = 0; i < grades.size(); ++i) {
+				System.out.println(i+1 + ". " + grades.get(i).toString());
+			}
 		} catch (SQLException exc) {
 			System.out.println(exc);
 		}
-		return(gradesFrom);
 	}
 }

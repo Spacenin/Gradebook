@@ -11,7 +11,7 @@ public class Quiz implements AssignmentInterface {
 	private LocalDate due;
 	
 	//Parameterized constructor
-	Quiz(int questionNumber, int score, char letter, String name, LocalDate date) {
+	public Quiz(int questionNumber, int score, char letter, String name, LocalDate date) {
 		this.questionNumber = questionNumber;
 		this.score = score;
 		this.letter = letter;
@@ -20,7 +20,7 @@ public class Quiz implements AssignmentInterface {
 	}
 	
 	//Default constructor, calling above constructor
-	Quiz() {
+	public Quiz() {
 		this(0, 0, ' ', " ", LocalDate.now());
 	}
 	

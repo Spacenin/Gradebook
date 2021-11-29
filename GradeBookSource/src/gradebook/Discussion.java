@@ -11,7 +11,7 @@ public class Discussion implements AssignmentInterface {
 	private LocalDate due;
 	
 	//Parameterized constructor
-	Discussion(String reading, int score, char letter, String name, LocalDate date) {
+	public Discussion(String reading, int score, char letter, String name, LocalDate date) {
 		this.reading = reading;
 		this.score = score;
 		this.letter = letter;
@@ -20,7 +20,7 @@ public class Discussion implements AssignmentInterface {
 	}
 	
 	//Default constructor, which calls above constructor
-	Discussion() {
+	public Discussion() {
 		this(" ", 0, ' ', " ", LocalDate.now());
 	}
 	
